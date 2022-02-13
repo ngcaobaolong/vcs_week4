@@ -3,7 +3,7 @@ import socket, re
 import argparse
 from helper import getResponseRaw
 
-parser = argparse.ArgumentParser(description='Get website title')
+parser = argparse.ArgumentParser(description='Download file from server')
 parser.add_argument('--url', action='store', dest = 'target_host', help='an url to get title', required=True)
 parser.add_argument('--remote-file', action='store', dest = 'remote_file', help='an url to get image', required=True)
 parser.usage = parser.format_help()

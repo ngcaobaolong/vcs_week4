@@ -26,8 +26,6 @@ mime = magic.Magic(mime=True)
 file_content = file_get_contents(file_path, "rb")
 # create a socket object 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-client.settimeout(0.5)
- 
 # connect the client 
 client.connect((target_host,target_port))  
  
@@ -58,7 +56,7 @@ else:
 
 # request the media page to find nonce
 request = (
-        f'GET /wp-admin/media-new.php HTTP/1.1\r\n'
+        f'GET /wp-admin/media-new.php/ HTTP/1.1\r\n'
         f'Host: {target_host}\r\n'
         f'Upgrade-Insecure-Requests: 1\r\n'
         f'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36\r\n'
@@ -68,12 +66,10 @@ request = (
         f'\r\n'
         )
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-client.settimeout(10)
- 
 # connect the client 
 client.connect((target_host,target_port))
-
 response = getResponse(client, target_host, request)
+
 # find nonce
 test = re.search('"multipart_params":.*_wpnonce":"[0-9a-z]+"', response)
 nonce = re.search('(?<=_wpnonce":")[0-9a-z]{10}', test.group(0))
@@ -106,7 +102,7 @@ body2 = ('\r\n'
 )
 body = b''.join([body1.encode(),file_content,body2.encode()])
 request = (
-        'POST /wp-admin/media-new.php HTTP/1.1\r\n'
+        'POST /wp-admin/media-new.php/ HTTP/1.1\r\n'
         f'Host: {target_host}\r\n'
         'Cache-Control: max-age=0\r\n'
         f'Content-Length: {len(body)}\r\n'
@@ -117,13 +113,38 @@ request = (
         'Accept-Encoding: gzip, deflate\r\n'
         'Accept-Language: en-US,en;q=0.9\r\n'
         f'Cookie: {getCookieString(cookieList)}\r\n'
-        'Connection: close\r\n\r\n'
+        'Connection: close\r\n\r\n\r\n'
 )
 request = b''.join([request.encode(),body])
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-client.settimeout(0.5)
- 
 # connect the client 
 client.connect((target_host,target_port))
 response = post(client, target_host, request)
+
+if "X-WP-Upload-Attachment-ID" in response:
+        print("Upload thành công")
+        attachment_id = response.split("\r\n")[7].split(" ")[1]
+        p = re.compile('ata-clipboard-text="(.*)">Copy')
+
+        body = (f'attachment_id={attachment_id}&fetch=3\r\n')
+        request = (
+                'POST /wp-admin/async-upload.php HTTP/1.1\r\n'
+                f'Host: {target_host}\r\n'
+                f'Content-Length: {len(body)}\r\n'
+                'Accept: text/html, */*; q=0.01\r\n'
+                'X-Requested-With: XMLHttpRequest\r\n'
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36\r\n'
+                'Content-Type: application/x-www-form-urlencoded; charset=UTF-8\r\n'
+                'Accept-Encoding: text/plain\r\n'
+                'Accept-Language: en-US,en;q=0.9\r\n'
+                f'Cookie: {getCookieString(cookieList)}\r\n'
+                'Connection: close\r\n\r\n'
+                f'{body}')
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+        # connect the client 
+        client.connect((target_host,80))
+        response = getResponse(client, target_host, request)
+        print("Url của ảnh: " + p.findall(response)[0])
+else:
+        print("Upload thất bại")

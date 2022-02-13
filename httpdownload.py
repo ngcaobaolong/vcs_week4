@@ -2,8 +2,9 @@ from importlib.metadata import requires
 import socket, re
 import argparse
 from helper import getResponseRaw
+import os
 
-parser = argparse.ArgumentParser(description='Download file from server')
+parser = argparse.ArgumentParser(description='Get website title')
 parser.add_argument('--url', action='store', dest = 'target_host', help='an url to get title', required=True)
 parser.add_argument('--remote-file', action='store', dest = 'remote_file', help='an url to get image', required=True)
 parser.usage = parser.format_help()
@@ -33,15 +34,16 @@ request = (
 )
 client.send(request.encode())  
  
-# receive some data 
-# response = client.recv(4096)  
+# receive some data  
 response = getResponseRaw(client,target_host,request)
 if b"200 OK" in response:
-    print("Image found")
-    f = open(remote_file.split("/")[-1], "wb")
+    print("Image found, downloading...")
+    file_name = remote_file.split("/")[-1]
+    f = open(file_name, "wb")
     i = 10
     a = response.split(b"\r\n")
     for i in range(10,len(a)):
         f.write(response.split(b"\r\n")[i]+b"\r\n")
+    print(file_name + " " + str(os.path.getsize(file_name)) + " bytes")
 else:
     print("Image not found")

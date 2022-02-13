@@ -8,7 +8,7 @@ from binascii import hexlify
 target_host = ""
 username = ""
 password = ""
-parser = argparse.ArgumentParser(description='User login')
+parser = argparse.ArgumentParser(description='User upload image')
 parser.add_argument('--url', action='store', dest = 'target_host', help='url to login', required=True)
 parser.add_argument('--username', action='store', dest = 'username', help='username to login', required=True)
 parser.add_argument('--password', action='store', dest = 'password', help='password to login', required=True)

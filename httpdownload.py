@@ -45,5 +45,6 @@ if b"200 OK" in response:
     for i in range(10,len(a)):
         f.write(response.split(b"\r\n")[i]+b"\r\n")
     print(file_name + " " + str(os.path.getsize(file_name)) + " bytes")
+    f.close()
 else:
     print("Image not found")

@@ -1,6 +1,38 @@
-import re
+import re,socket
 def getResponse(sck, host, request):
-    sck.send(request.encode())         
+    sck.sendall(request.encode())         
+    response = ""
+    while True:
+        try:
+            data = sck.recv(2048)
+            if not data:
+                break
+        except socket.timeout:
+            break
+        # print(data)
+        response += data.decode()
+    sck.shutdown(socket.SHUT_RDWR)
+    sck.close()
+    return response
+
+def getResponseRaw(sck, host, request):
+    sck.sendall(request.encode())         
+    response = b""
+    while True:
+        try:
+            data = sck.recv(2048)
+            if not data:
+                break
+        except socket.timeout:
+            break
+        # print(data)
+        response += data
+    sck.shutdown(socket.SHUT_RDWR)
+    sck.close()
+    return response
+
+def post(sck,host,request):
+    sck.sendall(request)         
     response = ""
     while True:
         try:
@@ -10,6 +42,8 @@ def getResponse(sck, host, request):
         except socket.timeout:
             break
         response += data.decode()
+    sck.shutdown(socket.SHUT_RDWR)
+    sck.close()
     return response
 
 def getCookieString(listCookie):
@@ -28,3 +62,7 @@ def updateCookieList(cookieList, response):
         return 0
     else:
         return 1
+
+def file_get_contents(filename, mod):
+    with open(filename, mode=mod) as f:
+        return f.read()

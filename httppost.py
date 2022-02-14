@@ -2,9 +2,6 @@ import socket, re
 import argparse
 from helper import getCookieString,getResponse,updateCookieList
 
-target_host = ""
-username = ""
-password = ""
 parser = argparse.ArgumentParser(description='User login')
 parser.add_argument('--url', action='store', dest = 'target_host', help='url to login', required=True)
 parser.add_argument('--username', action='store', dest = 'username', help='username to login', required=True)
@@ -46,4 +43,3 @@ if logInCookie:
     print("User test đăng nhập thành công")
 else:
     print("User test đăng nhập thất bại")
-    sys.exit(0)
